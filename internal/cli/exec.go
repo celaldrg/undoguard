@@ -231,7 +231,13 @@ func cmdRun(a *app, args []string) int {
 	}
 	fmt.Fprintf(a.stderr, "undoguard: guarding the shell commands of %s, session %s\n", name, session)
 	fmt.Fprintf(a.stderr, "undoguard: 'undoguard undo --session-id %s' undoes them all\n", session)
-	return a.runChild(rest[0], rest[1:], env)
+	// A shell started as the agent itself goes through its wrapper too, so
+	// 'undoguard run -- bash -c ...' guards that command line.
+	prog := rest[0]
+	if !strings.ContainsRune(prog, '/') && installed[prog] {
+		prog = filepath.Join(dir, prog)
+	}
+	return a.runChild(prog, rest[1:], env)
 }
 
 // writeShim writes a script that sends a shell's arguments through
