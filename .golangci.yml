@@ -1,0 +1,20 @@
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - misspell
+    - unconvert
+    - bodyclose
+    - nilerr
+  settings:
+    errcheck:
+      exclude-functions:
+        - io.WriteString
+  exclusions:
+    presets:
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofmt

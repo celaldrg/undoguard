@@ -1,0 +1,4 @@
+/undoguard
+/dist/
+*.test
+*.out

@@ -1,0 +1,68 @@
+# Example user policy: copy to ~/.config/undoguard/policy.toml
+# (or $XDG_CONFIG_HOME/undoguard/policy.toml, or
+# $UNDOGUARD_CONFIG_DIR/policy.toml) and keep only what you change.
+# Every key is optional; the values shown under [defaults] and
+# [snapshot] are the built-in ones.
+
+# Paths that are always denied, on top of the built-in list (~/.ssh,
+# ~/.aws, ~/.gnupg, ~/.config, ~/.kube, /etc, /usr, ...). The undoguard
+# data and config directories are always protected.
+protected = [
+  "~/notes",
+  "~/work/contracts",
+]
+
+# Remove entries from the built-in protected list. Only this file can do
+# that, never a project's .undoguard.toml.
+# unprotected = ["~/.config"]
+
+# Extra disposable directories. Commands that only touch them are allowed
+# and not snapshotted. /tmp, /var/tmp and $TMPDIR are scratch already.
+scratch = [
+  "~/.cache",
+]
+
+# The action for each class of target. A command gets the strictest
+# action of everything it touches.
+[defaults]
+project      = "allow" # inside the project; snapshotted first
+project_root = "ask"   # the project directory itself
+scratch      = "allow" # temporary directories
+home         = "deny"  # home directory outside the project
+elsewhere    = "ask"   # any other path
+unresolved   = "ask"   # paths or code only known at run time
+external     = "ask"   # databases, containers, clusters, services, remotes
+critical     = "deny"  # disks, partitions, file systems
+
+[snapshot]
+max_file_size  = "512MiB" # larger files make the command ask instead
+max_total_size = "2GiB"   # per command
+max_files      = 50000    # paths per command; 0 means no cap
+store_limit    = "10GiB"  # gc trims the store down to this
+keep_days      = 14
+keep_min       = 20       # the newest snapshots that are always kept
+
+# Rules are checked against every command and every finding. All the
+# fields that are set must match. In a path, * and ? stop at "/" and **
+# crosses it; a trailing /** also matches the directory itself. In a
+# command or finding, * matches anything.
+# The strictest matching rule replaces the action of the class, so a rule
+# can loosen a default too. Protected paths stay denied whatever the
+# rules say.
+
+[[rule]]
+name    = "no force pushes"
+command = "git push *--force*"
+action  = "deny"
+reason  = "force pushes go through review"
+
+[[rule]]
+name    = "local containers are fine"
+finding = "docker-rm"
+action  = "allow"
+
+[[rule]]
+name   = "throwaway checkouts"
+path   = "~/src/sandbox/**"
+action = "allow"
+reason = "nothing in the sandbox is precious"

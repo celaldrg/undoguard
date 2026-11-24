@@ -1,0 +1,24 @@
+# Example project policy: save as .undoguard.toml at the root of a
+# repository. The agent works inside that repository, so this file can
+# only make the user policy stricter: looser defaults, allow rules,
+# unprotected, scratch and snapshot limits are ignored with a warning.
+# undoguard asks before any command that changes this file.
+
+# Protect paths of this project on top of the user's list.
+protected = [
+  "~/src/shop/migrations",
+]
+
+[defaults]
+external = "deny" # no database or container changes from this project
+
+[[rule]]
+name    = "keep the fixtures"
+path    = "~/src/shop/testdata/**"
+action  = "ask"
+reason  = "fixtures are hand made"
+
+[[rule]]
+name    = "no production database"
+command = "psql *prod*"
+action  = "deny"

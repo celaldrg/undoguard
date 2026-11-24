@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "BeforeTool": [
+      {
+        "matcher": "run_shell_command|write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "undoguard hook gemini",
+            "timeout": 300000
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command|write_file|replace",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "undoguard hook gemini-post",
+            "timeout": 120000
+          }
+        ]
+      }
+    ]
+  }
+}
