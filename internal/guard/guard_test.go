@@ -307,6 +307,8 @@ func TestBypassTable(t *testing.T) {
 		{cmd: "shred -u ~/notes.txt", want: deny},
 		{cmd: "tee ~/notes.txt < README.md", want: deny},
 		{cmd: "sed -i s/a/b/ ~/notes.txt", want: deny},
+		{cmd: "sed -i '' s/a/b/ ~/notes.txt", want: deny},
+		{cmd: "sed -i .bak -e s/a/b/ ~/notes.txt", want: deny},
 
 		// Disks.
 		{cmd: "dd if=/dev/zero of=/dev/sda", want: deny},

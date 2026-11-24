@@ -375,8 +375,16 @@ func dd(c *parser.Command) []Finding {
 	return fileWrites(c, []parser.Word{of}, op, "dd", what)
 }
 
+// isSedSuffix reports whether w reads as a BSD sed -i backup suffix.
+func isSedSuffix(w parser.Word) bool {
+	return !w.Dynamic && (w.Value == "" || strings.HasPrefix(w.Value, ".") && !strings.Contains(w.Value, "/"))
+}
+
 func sed(c *parser.Command) []Finding {
 	// BSD sed on macOS takes the backup suffix of -i as its own argument.
+	// GNU sed is often first on PATH there too, so only a word that reads as
+	// a suffix ('' or .bak) is taken as one; anything else is read the GNU way,
+	// which never misses a file the BSD reading would edit.
 	bsd := runtime.GOOS == "darwin" && c.Name == "sed"
 	inPlace, haveScript, follow := false, false, false
 	var operands []parser.Word
@@ -415,7 +423,7 @@ func sed(c *parser.Command) []Finding {
 			switch v[j] {
 			case 'i', 'I':
 				inPlace = true
-				if bsd && j+1 == len(v) {
+				if bsd && j+1 == len(v) && i+1 < len(args) && isSedSuffix(args[i+1]) {
 					i++
 				}
 				j = len(v)
